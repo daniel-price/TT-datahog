@@ -1,15 +1,12 @@
 {
   "name": "datahog",
   "version": "1.0.0",
-  "description": "Repo to hold all Datahog code",
-  "main": "index.js",
+  "description": "Datahog",
   "scripts": {
-    "start": "node index.js",
-    "test": "jest --coverage"
-  },
-  "dependencies": {
-    "express": "^4.17.1",
-    "express-openapi-validator": "^4.12.6"
+    "installAll": "npm i && cd src && cd mock_api && npm i && cd ../app && npm i && cd ../..",
+    "testAll": "cd src && cd app && npm test && cd../..",
+    "startMockApi": "cd src/mock_api && npm run start && cd../..",
+    "startApp": "cd src/app && npm run start && cd../.."
   },
   "devDependencies": {
     "jest": "^26.6.3",
