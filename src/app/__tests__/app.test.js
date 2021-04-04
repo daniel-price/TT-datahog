@@ -1,8 +1,14 @@
 const app = require("../app");
 const supertest = require("supertest");
 const request = supertest(app);
+const aws = require("../aws");
+
+jest.mock("../aws");
 
 describe("app", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("GET on / should respond with 'Server is running'", async () => {
     const res = await request.get("/");
 
@@ -17,6 +23,12 @@ describe("app", () => {
 
     expect(res.status).toEqual(200);
     expect(res.text).toEqual("SUCCESS");
+    expect(
+      aws.sendMessageToQueue
+    ).toHaveBeenCalledWith(
+      "http://localhost:4566/000000000000/request_handler_queue",
+      { callbackUrl: "http://google.com", provider: "gas" }
+    );
   });
 
   it("POST with invalid provider on / should respond with 'SUCCESS'", async () => {

@@ -1,8 +1,11 @@
 const validator = require("express-openapi-validator");
 const express = require("express");
 const path = require("path");
+const { sendMessageToQueue } = require("./aws");
 
 const OPEN_API_SPEC_PATH = path.join(__dirname, "api.yml");
+const SQS_QUEUE_URL =
+  "http://localhost:4566/000000000000/request_handler_queue";
 
 const app = express();
 app.use(express.json());
@@ -26,6 +29,7 @@ app.get("/", (_req, res) => {
 });
 
 app.post("/", (req, res) => {
+  sendMessageToQueue(SQS_QUEUE_URL, req.query);
   res.send("SUCCESS");
 });
 
