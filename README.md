@@ -16,6 +16,8 @@ Ensure docker is running
 
 `docker-compose up`
 
+`npm run deployTf`
+
 `npm run startMockApi`
 
 `npm run startApp`

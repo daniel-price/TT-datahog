@@ -1,2 +1,7 @@
 node_modules
 coverage
+.terraform.tfstate.lock.info
+terraform.tfstate
+terraform.tfstate.backup
+.terraform
+zips
