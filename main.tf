@@ -31,6 +31,11 @@ provider "aws" {
   }
 }
 
+resource "aws_sqs_queue" "request_handler_queue" {
+  name          = "request_handler_queue"
+  delay_seconds = 0
+}
+
 data "archive_file" "request_handler_archive" {
   type        = "zip"
   source_dir  = "./src/request_handler"
@@ -67,4 +72,23 @@ resource "aws_lambda_function" "request_handler_function" {
   runtime          = "nodejs14.x"
   source_code_hash = data.archive_file.request_handler_archive.output_base64sha256
   publish          = true
+}
+
+resource "aws_iam_role_policy_attachment" "request_handler_role_policy" {
+  role       = aws_iam_role.request_handler_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_vpc_logs_pa" {
+  role       = aws_iam_role.request_handler_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+resource "aws_lambda_event_source_mapping" "request_handler_event_source_mapping" {
+  event_source_arn = aws_sqs_queue.request_handler_queue.arn
+  function_name    = aws_lambda_function.request_handler_function.arn
+}
+
+output "request_handler_queue_url" {
+  value = aws_sqs_queue.request_handler_queue.id
 }
