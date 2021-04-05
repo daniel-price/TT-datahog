@@ -4,7 +4,6 @@ AWS.config.update({ region: "us-east-1" });
 
 const sqs = new AWS.SQS();
 
-//TODO: extract this into shared library
 async function sendMessageToQueue(queueUrl, body) {
   const delaySeconds = body.nextDelaySeconds || 0;
   //Putting this in the attributes (rather than the body)
