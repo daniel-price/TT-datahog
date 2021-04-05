@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Datahog",
   "scripts": {
-    "installAll": "npm i && cd src && cd mock_api && npm i && cd ../app && npm i && cd ../request_handler && npm i && cd ../..",
-    "testAll": "cd src && cd app && npm test && cd ../request_handler && npm test && cd../..",
+    "installAll": "npm i && cd src && cd mock_api && npm i && cd ../app && npm i && cd ../request_handler && npm i && cd ../response_dispatcher && npm i && cd ../..",
+    "testAll": "cd src && cd app && npm test && cd ../request_handler && npm test && cd ../response_dispatcher && npm test && cd../..",
     "startMockApi": "cd src/mock_api && npm run start && cd../..",
     "startApp": "cd src/app && npm run start && cd../..",
     "deployTf": "rm -rf .terraform terraform.tfstate terraform.tfstate.backup && terraform init && terraform apply --auto-approve"

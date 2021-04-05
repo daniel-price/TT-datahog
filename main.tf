@@ -35,3 +35,8 @@ module "request_handler_sqs_lambda" {
   source     = "./modules/sqs_lambda"
   source_dir = "request_handler"
 }
+
+module "response_dispatcher_sqs_lambda" {
+  source     = "./modules/sqs_lambda"
+  source_dir = "response_dispatcher"
+}

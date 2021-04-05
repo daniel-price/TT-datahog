@@ -1,0 +1,15 @@
+{
+  "name": "response_dispatcher",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Not yet implemented\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.875.0",
+    "axios": "^0.21.1"
+  }
+}
