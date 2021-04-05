@@ -10,6 +10,16 @@ The solution is made up of:
 
 ## Prerequisites
 
+Requires 
+1. docker
+
+2. localstack
+
+3. terraform
+
+4. awscli-local
+
+
 `pip install awscli-local localstack && pipenv install --dev terraform-bin`
 
 Ensure docker is running
