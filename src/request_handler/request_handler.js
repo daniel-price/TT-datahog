@@ -10,6 +10,9 @@ exports.handler = async function (event) {
   const messageAttributes = event.Records[0].messageAttributes;
   const provider = messageAttributes.provider.stringValue;
   const callbackUrl = messageAttributes.callbackUrl.stringValue;
+  const delaySeconds = messageAttributes.delaySeconds
+    ? Number(messageAttributes.delaySeconds.stringValue)
+    : 1;
 
   try {
     const response = await axios.get(`${BASE_REQUEST_URL}${provider}`);
@@ -21,9 +24,13 @@ exports.handler = async function (event) {
       data,
     });
   } catch (e) {
-    //the server isn't available, so add it back to the queue to be tried again
-    //TODO: add delivery delay, with exponential backoff
-    await sendMessageToQueue(RETRY_QUEUE, { provider, callbackUrl });
+    //the server isn't available, so add it back to the queue (with a delay) to be tried again
+    const nextDelaySeconds = Math.min(delaySeconds * 2, 900);
+    await sendMessageToQueue(RETRY_QUEUE, {
+      provider,
+      callbackUrl,
+      nextDelaySeconds,
+    });
   }
 
   return true;

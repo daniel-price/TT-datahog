@@ -60,6 +60,32 @@ describe("requestHandler", () => {
       {
         callbackUrl: "a",
         provider: "gas",
+        nextDelaySeconds: 2,
+      }
+    );
+  });
+
+  it("Should send message to retry queue with double the previous delaySeconds if data not successfully received", async () => {
+    axios.get.mockRejectedValue("Server not available");
+
+    await requestHandler({
+      Records: [
+        {
+          messageAttributes: {
+            provider: { stringValue: "gas" },
+            callbackUrl: { stringValue: "a" },
+            delaySeconds: { stringValue: "8" },
+          },
+        },
+      ],
+    });
+
+    expect(aws.sendMessageToQueue).toHaveBeenCalledWith(
+      "http://localhost:4566/000000000000/request_handler_queue",
+      {
+        callbackUrl: "a",
+        provider: "gas",
+        nextDelaySeconds: 16,
       }
     );
   });

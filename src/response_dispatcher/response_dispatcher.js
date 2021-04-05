@@ -9,13 +9,20 @@ exports.handler = async function (event) {
   const provider = messageAttributes.provider.stringValue;
   const callbackUrl = messageAttributes.callbackUrl.stringValue;
   const data = messageAttributes.data.stringValue;
+  const delaySeconds = messageAttributes.delaySeconds
+    ? Number(messageAttributes.delaySeconds.stringValue)
+    : 1;
 
   try {
     await axios.post(callbackUrl, { data });
   } catch (e) {
-    //the server isn't available, so add it back to the queue to be tried again
-    //TODO: add delivery delay, with exponential backoff
-    await sendMessageToQueue(RETRY_QUEUE, { provider, callbackUrl, data });
+    const nextDelaySeconds = Math.min(delaySeconds * 2, 900);
+    await sendMessageToQueue(RETRY_QUEUE, {
+      provider,
+      callbackUrl,
+      data,
+      nextDelaySeconds,
+    });
   }
 
   return true;

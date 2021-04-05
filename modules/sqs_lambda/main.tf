@@ -1,6 +1,7 @@
 resource "aws_sqs_queue" "queue" {
   name          = "${var.source_dir}_queue"
   delay_seconds = 0
+  visibility_timeout_seconds = 600
 }
 
 data "archive_file" "archive" {
@@ -52,8 +53,8 @@ resource "aws_iam_role_policy_attachment" "lambda_vpc_logs_pa" {
 }
 
 resource "aws_lambda_event_source_mapping" "event_source_mapping" {
-  event_source_arn = aws_sqs_queue.queue.arn
-  function_name    = aws_lambda_function.function.arn
+  event_source_arn                   = aws_sqs_queue.queue.arn
+  function_name                      = aws_lambda_function.function.arn
 }
 
 output "queue_url" {
