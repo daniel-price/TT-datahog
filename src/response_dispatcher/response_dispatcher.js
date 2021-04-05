@@ -8,6 +8,7 @@ exports.handler = async function (event) {
   const messageAttributes = event.Records[0].messageAttributes;
   const provider = messageAttributes.provider.stringValue;
   const callbackUrl = messageAttributes.callbackUrl.stringValue;
+  const data = messageAttributes.data.stringValue;
 
   try {
     await axios.post(callbackUrl, { data });

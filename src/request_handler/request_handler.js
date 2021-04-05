@@ -2,6 +2,8 @@ const axios = require("axios");
 const { sendMessageToQueue } = require("./aws");
 
 const RETRY_QUEUE = "http://localhost:4566/000000000000/request_handler_queue";
+const RESPONSE_DISPATCHER_QUEUE =
+  "http://localhost:4566/000000000000/response_dispatcher_queue";
 const BASE_REQUEST_URL = `http://host.docker.internal:3000/providers/`;
 
 exports.handler = async function (event) {
@@ -13,10 +15,11 @@ exports.handler = async function (event) {
     const response = await axios.get(`${BASE_REQUEST_URL}${provider}`);
     const data = response.data;
 
-    await axios.post(
-      "https://webhook.site/e9f6dbce-5b3e-468a-ba7f-de7e4a6caa68",
-      { data }
-    );
+    await sendMessageToQueue(RESPONSE_DISPATCHER_QUEUE, {
+      provider,
+      callbackUrl,
+      data,
+    });
   } catch (e) {
     //the server isn't available, so add it back to the queue to be tried again
     //TODO: add delivery delay, with exponential backoff
