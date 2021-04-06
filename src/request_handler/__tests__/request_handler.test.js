@@ -1,32 +1,32 @@
-const requestHandler = require("../request_handler").handler;
-const axios = require("axios");
-const aws = require("../aws");
+const requestHandler = require("../request_handler").handler
+const axios = require("axios")
+const aws = require("../aws")
 
-jest.mock("axios");
-jest.mock("../aws");
+jest.mock("axios")
+jest.mock("../aws")
 
 describe("requestHandler", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+  })
   it("Should send message to dispatch queue if data successfully received", async () => {
     axios.get.mockResolvedValue({
       data: [
         { billedOn: "2020-04-07T15:03:14.257Z", amount: 22.27 },
         { billedOn: "2020-05-07T15:03:14.257Z", amount: 30 },
       ],
-    });
+    })
 
     await requestHandler({
       Records: [
         {
-          messageAttributes: {
-            provider: { stringValue: "gas" },
-            callbackUrl: { stringValue: "a" },
-          },
+          body: JSON.stringify({
+            provider: "gas",
+            callbackUrl: "a",
+          }),
         },
       ],
-    });
+    })
 
     expect(aws.sendMessageToQueue).toHaveBeenCalledWith(
       "http://localhost:4566/000000000000/response_dispatcher_queue",
@@ -38,55 +38,55 @@ describe("requestHandler", () => {
         ],
         provider: "gas",
       }
-    );
-  });
+    )
+  })
 
   it("Should send message to retry queue if data not successfully received", async () => {
-    axios.get.mockRejectedValue("Server not available");
+    axios.get.mockRejectedValue("Server not available")
 
     await requestHandler({
       Records: [
         {
-          messageAttributes: {
-            provider: { stringValue: "gas" },
-            callbackUrl: { stringValue: "a" },
-          },
+          body: JSON.stringify({
+            provider: "gas",
+            callbackUrl: "a",
+          }),
         },
       ],
-    });
+    })
 
     expect(aws.sendMessageToQueue).toHaveBeenCalledWith(
       "http://localhost:4566/000000000000/request_handler_queue",
       {
         callbackUrl: "a",
         provider: "gas",
-        nextDelaySeconds: 2,
+        delaySeconds: 2,
       }
-    );
-  });
+    )
+  })
 
   it("Should send message to retry queue with double the previous delaySeconds if data not successfully received", async () => {
-    axios.get.mockRejectedValue("Server not available");
+    axios.get.mockRejectedValue("Server not available")
 
     await requestHandler({
       Records: [
         {
-          messageAttributes: {
-            provider: { stringValue: "gas" },
-            callbackUrl: { stringValue: "a" },
-            delaySeconds: { stringValue: "8" },
-          },
+          body: JSON.stringify({
+            provider: "gas",
+            callbackUrl: "a",
+            delaySeconds: "8",
+          }),
         },
       ],
-    });
+    })
 
     expect(aws.sendMessageToQueue).toHaveBeenCalledWith(
       "http://localhost:4566/000000000000/request_handler_queue",
       {
         callbackUrl: "a",
         provider: "gas",
-        nextDelaySeconds: 16,
+        delaySeconds: 16,
       }
-    );
-  });
-});
+    )
+  })
+})

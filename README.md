@@ -18,8 +18,6 @@ Requires
 
 3. terraform
 
-4. awscli
-
 `choco install terraform awscli`
 
 Ensure docker is running

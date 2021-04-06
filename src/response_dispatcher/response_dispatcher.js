@@ -1,29 +1,25 @@
-const axios = require("axios");
-const { sendMessageToQueue } = require("./aws");
+const axios = require("axios")
+const { sendMessageToQueue } = require("./aws")
 
 const RETRY_QUEUE =
-  "http://localhost:4566/000000000000/response_dispatcher_queue";
+  "http://localhost:4566/000000000000/response_dispatcher_queue"
 
 exports.handler = async function (event) {
-  const messageAttributes = event.Records[0].messageAttributes;
-  const provider = messageAttributes.provider.stringValue;
-  const callbackUrl = messageAttributes.callbackUrl.stringValue;
-  const data = messageAttributes.data.stringValue;
-  const delaySeconds = messageAttributes.delaySeconds
-    ? Number(messageAttributes.delaySeconds.stringValue)
-    : 1;
+  const { provider, callbackUrl, data, delaySeconds = 1 } = JSON.parse(
+    event.Records[0].body
+  )
 
   try {
-    await axios.post(callbackUrl, { data });
+    await axios.post(callbackUrl, { data })
   } catch (e) {
-    const nextDelaySeconds = Math.min(delaySeconds * 2, 900);
+    const nextDelaySeconds = Math.min(delaySeconds * 2, 900)
     await sendMessageToQueue(RETRY_QUEUE, {
       provider,
       callbackUrl,
       data,
-      nextDelaySeconds,
-    });
+      delaySeconds: nextDelaySeconds,
+    })
   }
 
-  return true;
-};
+  return true
+}
