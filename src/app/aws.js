@@ -1,19 +1,44 @@
-const { exec } = require("child_process")
+const AWS = require("aws-sdk")
 
-/**
- * Mocking the aws sdk to workaround a difficulty writing from a locally running app to SQS queues in localstack
- */
-async function sendMessageToQueue(queueUrl, { provider, callbackUrl }) {
-  const messageBody = `provider={DataType=String,StringValue="${provider}"},callbackUrl={DataType=String,StringValue="${callbackUrl}"}`
+AWS.config.update({
+  region: "us-east-1",
+  accessKeyId: "test",
+  secretAccessKey: "test",
+})
 
-  exec(
-    `aws --endpoint=http://localhost:4566 sqs send-message --queue-url ${queueUrl} --message-body ${messageBody} --message-attributes ${messageBody}`,
-    (err, stout, sterr) => {
-      if (err) console.log("err", err)
-      if (stout) console.log("stout", stout)
-      if (sterr) console.log("sterr", sterr)
-    }
-  )
+const sqs = new AWS.SQS()
+
+async function sendMessageToQueue(queueUrl, body) {
+  const delaySeconds = body.nextDelaySeconds || 0
+  try {
+    await sqs
+      .sendMessage({
+        MessageAttributes: {
+          provider: {
+            DataType: "String",
+            StringValue: body.provider,
+          },
+          callbackUrl: {
+            DataType: "String",
+            StringValue: body.callbackUrl,
+          },
+          data: {
+            DataType: "String",
+            StringValue: JSON.stringify(body.data || ""),
+          },
+          delaySeconds: {
+            DataType: "String",
+            StringValue: delaySeconds.toString(),
+          },
+        },
+        MessageBody: JSON.stringify(body),
+        QueueUrl: queueUrl.replace("localhost", "host.docker.internal"), //another workaround for localstack
+        DelaySeconds: delaySeconds,
+      })
+      .promise()
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 module.exports = { sendMessageToQueue }
