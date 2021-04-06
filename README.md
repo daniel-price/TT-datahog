@@ -10,17 +10,17 @@ The solution is made up of:
 
 ## Prerequisites
 
-Requires 
+Requires
+
 1. docker
 
-2. localstack
+2. localstack (installed by docker-compose)
 
 3. terraform
 
-4. awscli-local
+4. awscli
 
-
-`pip install awscli-local localstack && pipenv install --dev terraform-bin`
+`choco install terraform awscli`
 
 Ensure docker is running
 
